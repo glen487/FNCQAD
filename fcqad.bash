@@ -134,7 +134,8 @@ for NODE in "${NODES[@]}"
                                APPVERSION="${RED}$APPVER${NC} ${X_MARK}"
                            fi
 			   # Fetch nodes block height
-		           KDANODEHEIGHT=$(curl -k -s https://"$NODE":30004/chainweb/0.0/mainnet01/cut | jq ".height")
+		           KDANODE=$(echo -e "$NODE" | awk -F ":" '{ print $1 }')
+                           KDANODEHEIGHT=$(curl -k -s https://"$KDANODE":30004/chainweb/0.0/mainnet01/cut | jq ".height")
 		       else
 		           if [[ "$APPVER" == *"latest"* ]]; then
 		               APPVERSION="${GREEN}$APPVER${NC} ${CHECK_MARK}"
