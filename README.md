@@ -61,7 +61,7 @@ cd FNCQAD
 Edit the config.cfg.
 When new versions are released change the value and run the check. 
 Check announcement channel or watchdog activity.
-Add your nodes IP address to the NODES variable. 
+Add your nodes IP address (external/public) to the NODES variable. 
 
 * FLUXVERSION="6.0.0"
 * FLUXNODEVERSION="3.10.0"
