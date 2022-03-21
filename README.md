@@ -90,7 +90,7 @@ chmod +x fcqad.bas
 
 #### 4) Sample output
 
-![Flux Node Status](nodes.png)
+![Flux Node Status](https://github.com/glen487/FNCQAD/blob/main/nodes.PNG)
 
 Feel free to donate. But you dont need to! Just wanted to share. :)
 ```
