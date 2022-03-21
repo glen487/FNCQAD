@@ -4,7 +4,9 @@
 Check node status and version. This gives a quick overview of the current status for you nodes. Main use case is to quick see that all nodes are confirmed, synced and on the correct software versions. 
 
 #### Basic features
-!!! This do not replace watchdog in any way. And current version do not support multi nodes on same ip address!!!
+!!! This do not replace watchdog in any way.!!!
+
+Multinode on same IP address now supported.
 
 Recommend using the watchdog.
 Check running version against local config file. 
@@ -38,6 +40,7 @@ If updates are released wathdog will update automatically, this script just givs
 ## Changes
 
 * 0.1 First public release
+* 0.2 Added multi node support.
 
 ## Requirement 
 
@@ -61,14 +64,17 @@ cd FNCQAD
 Edit the config.cfg.
 When new versions are released change the value and run the check. 
 Check announcement channel or watchdog activity.
-Add your nodes IP address (external/public) to the NODES variable. 
+Add your nodes IP "ipaddress:port" (external/public) to the NODES variable.
+
+Multinode supported.
+Ports allowed are: 16127, 16137, 16147, 16157, 16167, 16177, 16187, 16197
 
 * FLUXVERSION="6.0.0"
 * FLUXNODEVERSION="3.10.0"
 * KDADATAVERSION="v1.1.0"
 * KDANODEVERSION="2.13.0"
 * FLUXBENCHMARK="3.1.0"
-* NODES=( 192.168.1.1 192.168.2.2 ) # Sample make sure there is a space between IP addresses
+* NODES=( 192.168.1.1:16127 192.168.2.2:16127 ) # Sample make sure there is a space between IP address:port
 
 
 #### Sample config.cfg
@@ -79,7 +85,7 @@ FLUXNODEVERSION="3.10.0"
 KDADATAVERSION="v1.1.0"
 KDANODEVERSION="2.13.0"
 FLUXBENCHMARK="3.1.0"
-NODES=( 192.168.1.1 192.168.2.2 )
+NODES=( 192.168.1.1:16127 192.168.1.1:16137 )
 ```
 
 #### 3) Run the script
