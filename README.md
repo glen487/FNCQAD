@@ -4,7 +4,8 @@
 Check node status and version. This gives a quick overview of the current status for you nodes. Main use case is to quick see that all nodes are confirmed, synced and on the correct software versions. 
 
 #### Basic features
-!!! This do not replace watchdog in any way. !!!
+!!! This do not replace watchdog in any way. And current version do not support multi nodes on same ip address!!!
+
 Recommend using the watchdog.
 Check running version against local config file. 
 If updates are released wathdog will update automatically, this script just givs a quick overview of your nodes status to make sure everthing is running fine.
