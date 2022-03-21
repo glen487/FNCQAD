@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Version: 0.1
+# Version 0.2 Added multi nodes upport
 
 # Load config file
 configfile='./config.cfg'
@@ -31,7 +31,7 @@ curl_ok=$?
 [[ "$curl_ok" -eq 127 ]] && \
     echo "fatal: curl not installed" && exit 2
 
-# Check jq
+# Check jq 
 jq --version >/dev/null 2>&1
 jq_ok=$?
 
@@ -52,59 +52,57 @@ EXPLORERHEIGHT=$(curl -s -k https://api.runonflux.io/daemon/getblockcount | jq "
 # Run checks on array of nodes in config.cfg
 for NODE in "${NODES[@]}"
  do
-   MYNODES=$(($MYNODES + 1))
-   curl -s -k -o $NODE.json http://"$NODE":16127/daemon/getzelnodestatus
+   MYNODES=$(($MYNODES + 1)) 
+   curl -s -k -o $NODE.json http://"$NODE"/daemon/getzelnodestatus
    if [ $? -eq 0 ]
        then
-           VERSION=$(curl -s -k http://"$NODE":16127/daemon/getnetworkinfo | jq ."data.subversion" | tr -d '"/' | awk -F ":" '{ print $2 }')
+           VERSION=$(curl -s -k http://"$NODE"/daemon/getnetworkinfo | jq ."data.subversion" | tr -d '"/' | awk -F ":" '{ print $2 }')
            STATUS=$(cat $NODE.json  | jq ."status" | tr -d '"')
            DATASTATUS=$(cat $NODE.json  | jq ."data.status" | tr -d '"')
-           FLUX=$(curl -s -k http://"$NODE":16127/flux/version | jq ."data" | tr -d '"')
+           FLUX=$(curl -s -k http://"$NODE"/flux/version | jq ."data" | tr -d '"')
            TIER=$(cat $NODE.json | jq ."data.tier" | tr -d '"')
-           BENCHMARK=$(curl -s -k http://$NODE:16127/benchmark/getinfo | jq ."data.version" | tr -d '"')
-           GETBENCHMARK=$(curl -s -k http://$NODE:16127/benchmark/getbenchmarks | jq ."data.status" | tr -d '"')
-           GETBLOCK=$(curl -s -k http://"$NODE":16127/daemon/getblockcount | jq ."data")
-           curl -s -k http://"$NODE":16127/apps/listrunningapps | jq '.data[] | {Names,Image,State,Status}' | tr -d '[]{}",'  > "$NODE"-zelapps.json
-           curl -s -k -o $NODE-getbenchmarks.json http://"$NODE":16127/benchmark/getbenchmarks
-           CORES=$(cat $NODE-getbenchmarks.json | jq ."data.cores")
-           RAM=$(cat $NODE-getbenchmarks.json | jq ."data.ram")
-           EPS=$(cat $NODE-getbenchmarks.json | jq ."data.eps")
-           TOALSTORAGE=$(cat $NODE-getbenchmarks.json | jq ."data.totalstorage")
-           DDWRITE=$(cat $NODE-getbenchmarks.json | jq ."data.ddwrite")
-           if [[ $STATUS == "success" && $DATASTATUS == "CONFIRMED" ]] ;then
-               NODESUP=$(($NODESUP + 1 ))
-               LASTP=$(cat $NODE.json  | jq ."data.lastpaid" | tr -d '"')
+           BENCHMARK=$(curl -s -k http://$NODE/benchmark/getinfo | jq ."data.version" | tr -d '"')
+           GETBENCHMARK=$(curl -s -k http://$NODE/benchmark/getbenchmarks | jq ."data.status" | tr -d '"')
+	   GETBLOCK=$(curl -s -k http://"$NODE"/daemon/getblockcount | jq ."data")
+           curl -s -k http://"$NODE"/apps/listrunningapps | jq '.data[] | {Names,Image,State,Status}' | tr -d '[]{}",'  > "$NODE"-zelapps.json
+           curl -s -k -o $NODE-getbenchmarks.json http://"$NODE"/benchmark/getbenchmarks 
+	   CORES=$(cat $NODE-getbenchmarks.json | jq ."data.cores")
+	   RAM=$(cat $NODE-getbenchmarks.json | jq ."data.ram")
+	   EPS=$(cat $NODE-getbenchmarks.json | jq ."data.eps")
+	   TOALSTORAGE=$(cat $NODE-getbenchmarks.json | jq ."data.totalstorage")
+	   DDWRITE=$(cat $NODE-getbenchmarks.json | jq ."data.ddwrite")
+	   if [[ $STATUS == "success" && $DATASTATUS == "CONFIRMED" ]] ;then
+	       NODESUP=$(($NODESUP + 1 ))
+	       LASTP=$(cat $NODE.json  | jq ."data.lastpaid" | tr -d '"')
                LASTPH=$(cat $NODE.json | jq ."data.last_paid_height" | tr -d '"')
                PDATE=$(date -d @"$LASTP")
                echo -e ""
-               echo -e "============================================================================================================="
+	       echo -e "============================================================================================================="
                if [ "$VERSION" = "$FLUXVERSION" ]; then
-                   FLUXVER="${GREEN}$VERSION${NC} ${CHECK_MARK}"
+		   FLUXVER="${GREEN}$VERSION${NC} ${CHECK_MARK}"
                else
                    FLUXVER="${RED}$VERSION${NC} ${X_MARK}"
                fi
                if [ "$FLUX" = "$FLUXNODEVERSION" ]; then
-                   FLUXOSVER="${GREEN}$FLUX${NC} ${CHECK_MARK}"
+		   FLUXOSVER="${GREEN}$FLUX${NC} ${CHECK_MARK}"
                else
-                   FLUXOSVER="${RED}$FLUX${NC} ${X_MARK}"
+		   FLUXOSVER="${RED}$FLUX${NC} ${X_MARK}"
                fi
                if [ "$BENCHMARK" = "$FLUXBENCHMARK" ]; then
-                   BENCHMARKVER="${GREEN}$BENCHMARK${NC} ${CHECK_MARK}"
+		   BENCHMARKVER="${GREEN}$BENCHMARK${NC} ${CHECK_MARK}"
                else
-                   BENCHMARKVER="${RED}$BENCHMARK${NC} ${X_MARK}"
+		   BENCHMARKVER="${RED}$BENCHMARK${NC} ${X_MARK}"
                fi
                if [ "$GETBLOCK" -ge "$EXPLORERHEIGHT" ]; then
-                   NODEBLOCK="${GREEN}$GETBLOCK${NC} ${CHECK_MARK}"
+		   NODEBLOCK="${GREEN}$GETBLOCK${NC} ${CHECK_MARK}"
                else
-                   NODEBLOCK="${RED}$GETBLOCK${NC} ${X_MARK} Explorer: $EXPLORERHEIGHT"
+		   NODEBLOCK="${RED}$GETBLOCK${NC} ${X_MARK} Explorer: $EXPLORERHEIGHT"
                fi
                echo -e "FluxNodes IP: ${BLUE}$NODE${NC}\t Tier: ${BLUE}$TIER${NC}\t Status: ${GREEN}$DATASTATUS${NC} ${CHECK_MARK}"
-               echo -e "Version Flux: $FLUXVER\t\t FluxOS: $FLUXOSVER\t Benchmark: $BENCHMARKVER"
-               echo -e "Last paid: ${YELLOW}$PDATE${NC}\t Block: ${YELLOW}$LASTPH${NC}\t Current Block: $NODEBLOCK"
-               echo -e "CPU Cores: ${CYAN}$CORES${NC}\t\t Mem: ${YELLOW}$RAM${NC}\t Total Storage:${BLUE}$TOALSTORAGE${NC}"
-               echo -e "EPS: ${CYAN}$EPS${NC}\t\t Disk WriteSpeed:${BLUE}$DDWRITE${NC}"
-               echo -e ""
-
+	       echo -e "Version Flux: $FLUXVER\t\t FluxOS: $FLUXOSVER\t Benchmark: $BENCHMARKVER"
+	       echo -e "Last paid: ${YELLOW}$PDATE${NC}\t Block: ${YELLOW}$LASTPH${NC}\t Current Block: $NODEBLOCK"
+	       echo -e "CPU Cores: ${CYAN}$CORES${NC}\t\t Mem: ${YELLOW}$RAM${NC}\t Total Storage:${BLUE}$TOALSTORAGE${NC}"
+	       echo -e "EPS: ${CYAN}$EPS${NC}\t\t Disk WriteSpeed:${BLUE}$DDWRITE${NC}"
                echo -e ""
                echo -e "Apps:"
                echo -e "------"
@@ -118,53 +116,53 @@ for NODE in "${NODES[@]}"
                        APPSTATE=$(cat $NODE-zelapps.json | grep -A 4 $APPNAME | grep "State" | tr -d '", ' | awk -F ":" '{ print $2 }')
                        APPSTATUS=$(cat $NODE-zelapps.json | grep -A 4 $APPNAME | grep "Status" | tr -d '",' | awk -F ":" '{ print $2 }')
                    if [ "$APPSTATE" = "running" ]; then
-                        STATES="${GREEN}$APPSTATE${NC} ${CHECK_MARK}"
+			STATES="${GREEN}$APPSTATE${NC} ${CHECK_MARK}"
                    else
-                        STATES="${RED}$APPSTATE${NC} ${X_MARK}"
+			STATES="${RED}$APPSTATE${NC} ${X_MARK}"
                    fi
                    if [ "$APPNAME" = "fluxKadenaChainWebData" ]; then
-                       if [ "$APPVER" = "$KDADATAVERSION" ]; then
-                           APPVERSION="${GREEN}$APPVER${NC} ${CHECK_MARK}"
+		       if [ "$APPVER" = "$KDADATAVERSION" ]; then
+			   APPVERSION="${GREEN}$APPVER${NC} ${CHECK_MARK}"
                        else
-                           APPVERSION="${RED}$APPVER${NC} ${X_MARK}"
-                       fi
-                  else
-                       if [ "$APPNAME" = "zelKadenaChainWebNode" ]; then
+			   APPVERSION="${RED}$APPVER${NC} ${X_MARK}"
+		       fi
+		  else
+		       if [ "$APPNAME" = "zelKadenaChainWebNode" ]; then
                            if [ "$APPVER" = "$KDANODEVERSION" ]; then
                                APPVERSION="${GREEN}$APPVER${NC} ${CHECK_MARK}"
                            else
                                APPVERSION="${RED}$APPVER${NC} ${X_MARK}"
                            fi
-                           # Fetch nodes block height
-                           KDANODEHEIGHT=$(curl -k -s https://"$NODE":30004/chainweb/0.0/mainnet01/cut | jq ".height")
-                       else
-                           if [[ "$APPVER" == *"latest"* ]]; then
-                               APPVERSION="${GREEN}$APPVER${NC} ${CHECK_MARK}"
+			   # Fetch nodes block height
+		           KDANODEHEIGHT=$(curl -k -s https://"$NODE":30004/chainweb/0.0/mainnet01/cut | jq ".height")
+		       else
+		           if [[ "$APPVER" == *"latest"* ]]; then
+		               APPVERSION="${GREEN}$APPVER${NC} ${CHECK_MARK}"
                            else
                                APPVERSION="${RED}$APPVER${NC} ${X_MARK}"
                            fi
-                       fi
+		       fi
+		   fi
+                   if [[ "$APPSTATUS" == *"Up"* ]]; then
+			APPSTATS="${GREEN}$APPSTATUS${NC} ${CHECK_MARK}"
+                   else
+			APPSTATS="${RED}$APPSTATUS${NC} ${X_MARK}"
                    fi
                    if [[ "$APPSTATUS" == *"Up"* ]]; then
-                        APPSTATS="${GREEN}$APPSTATUS${NC} ${CHECK_MARK}"
+			APPSTATS="${GREEN}$APPSTATUS${NC} ${CHECK_MARK}"
                    else
-                        APPSTATS="${RED}$APPSTATUS${NC} ${X_MARK}"
-                   fi
-                   if [[ "$APPSTATUS" == *"Up"* ]]; then
-                        APPSTATS="${GREEN}$APPSTATUS${NC} ${CHECK_MARK}"
-                   else
-                        APPSTATS="${RED}$APPSTATUS${NC} ${X_MARK}"
+			APPSTATS="${RED}$APPSTATUS${NC} ${X_MARK}"
                    fi
                    if [ "$APPNAME" = "zelKadenaChainWebNode" ]; then
-                       echo -e "Name: ${GREEN}$APPNAME${NC}"
-                       echo -e "Version: $APPVERSION\tState: $STATES\tApp status: $APPSTATS\tHeight: ${YELLOW}$KDANODEHEIGHT${NC}"
-                   else
-                       echo -e "Name: ${GREEN}$APPNAME${NC}"
-                       echo -e "Version: $APPVERSION\tState: $STATES\tApp status: $APPSTATS\t"
-                   fi
-                   done
+		       echo -e "Name: ${GREEN}$APPNAME${NC}"
+		       echo -e "Version: $APPVERSION\tState: $STATES\tApp status: $APPSTATS\tHeight: ${YELLOW}$KDANODEHEIGHT${NC}"
+	           else
+		       echo -e "Name: ${GREEN}$APPNAME${NC}"
+		       echo -e "Version: $APPVERSION\tState: $STATES\tApp status: $APPSTATS\t"
+		   fi
+	           done
                fi
-           fi
+	   fi
            else
                echo -e "============================================================================"
                echo -e "FluxNode IP: ${YELLOW}$NODE${NC} ${RED}failed ${X_MARK}"
@@ -180,7 +178,7 @@ done
 echo -e ""
 echo -e "Summary Node status"
 echo -e "============================="
-if [ $NODESUP -eq $MYNODES ]; then
+if [ $NODESUP -eq $MYNODES ]; then 
 echo -e "Nodes Total: ${BLUE}$MYNODES${NC} Up: ${GREEN}$NODESUP${NC} ${CHECK_MARK}"
    echo -e "${GREEN}All good!${NC}"
 else
