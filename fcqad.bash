@@ -1,6 +1,9 @@
 #!/bin/bash
 
-# Version 0.2 Added multi nodes upport
+# Versions
+# 0.1
+# 0.2 Added multi nodes upport
+# 0.3 Bug fix for non confirmed nodes
 
 # Load config file
 configfile='./config.cfg'
@@ -98,9 +101,12 @@ for NODE in "${NODES[@]}"
                else
 		   NODEBLOCK="${RED}$GETBLOCK${NC} ${X_MARK} Explorer: $EXPLORERHEIGHT"
                fi
+               NEXTPAY=$(echo $LASTPH+$STRATUS-$EXPLORERHEIGHT | bc)
+               PAYHOUR=$(echo $NEXTPAY*2/60 | bc)
                echo -e "FluxNodes IP: ${BLUE}$NODE${NC}\t Tier: ${BLUE}$TIER${NC}\t Status: ${GREEN}$DATASTATUS${NC} ${CHECK_MARK}"
 	       echo -e "Version Flux: $FLUXVER\t\t FluxOS: $FLUXOSVER\t Benchmark: $BENCHMARKVER"
 	       echo -e "Last paid: ${YELLOW}$PDATE${NC}\t Block: ${YELLOW}$LASTPH${NC}\t Current Block: $NODEBLOCK"
+	       echo -e "Next payment: ${YELLOW}$PAYHOUR${NC} hours"
 	       echo -e "CPU Cores: ${CYAN}$CORES${NC}\t\t Mem: ${YELLOW}$RAM${NC}\t Total Storage:${BLUE}$TOALSTORAGE${NC}"
 	       echo -e "EPS: ${CYAN}$EPS${NC}\t\t Disk WriteSpeed:${BLUE}$DDWRITE${NC}"
                echo -e ""
@@ -162,12 +168,12 @@ for NODE in "${NODES[@]}"
 		       echo -e "Version: $APPVERSION\tState: $STATES\tApp status: $APPSTATS\t"
 		   fi
 	           done
-               fi
 	   fi
            else
                echo -e "============================================================================"
-               echo -e "FluxNode IP: ${YELLOW}$NODE${NC} ${RED}failed ${X_MARK}"
+	       echo -e "FluxNode IP: ${YELLOW}$NODE${NC}\tTier: ${BLUE}$TIER${NC}\tStatus: ${YELLOW}$DATASTATUS ${X_MARK}"
                echo -e "Status: ${RED}Not confirmed${NC}"
+	   fi
    fi
    # Clean up
    rm -f node-count.json
