@@ -41,6 +41,7 @@ If updates are released wathdog will update automatically, this script just givs
 
 * 0.1 First public release
 * 0.2 Added multi node support.
+* 0.3 Bug fix for non confirmed nodes
 
 ## Requirement 
 
