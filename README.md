@@ -74,10 +74,10 @@ Multinode supported.
 Ports allowed are: 16127, 16137, 16147, 16157, 16167, 16177, 16187, 16197
 
 * FLUXVERSION="6.0.0"
-* FLUXNODEVERSION="3.10.0"
+* FLUXNODEVERSION="3.15.0"
 * KDADATAVERSION="v1.1.0"
 * KDANODEVERSION="2.13.0"
-* FLUXBENCHMARK="3.1.0"
+* FLUXBENCHMARK="3.2.0"
 * NODES=( 192.168.1.1:16127 192.168.2.2:16127 ) # Sample make sure there is a space between IP address:port
 
 
@@ -95,7 +95,7 @@ NODES=( 192.168.1.1:16127 192.168.1.1:16137 )
 #### 3) Run the script
 
 ```bash
-chmod +x fcqad.bas
+chmod +x fcqad.bash
 ./fcqad.bash
 ```
 
