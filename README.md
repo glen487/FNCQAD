@@ -30,6 +30,8 @@ If updates are released wathdog will update automatically, this script just givs
   * Total Storage
   * CPU EPS
   * Disk writespeed
+  * Ping time
+  * Test result upload/download
 * Apps
   * List running apps 
   * State
@@ -42,6 +44,7 @@ If updates are released wathdog will update automatically, this script just givs
 * 0.1 First public release
 * 0.2 Added multi node support.
 * 0.3 Bug fix for non confirmed nodes
+* 0.4 Added new results from benchmark (speed)
 
 ## Requirement 
 
