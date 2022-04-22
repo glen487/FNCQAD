@@ -1,9 +1,11 @@
 #!/bin/bash
 
-# Versions
+# Version 
 # 0.1
 # 0.2 Added multi nodes upport
 # 0.3 Bug fix for non confirmed nodes
+# 0.4 Added new results from benchmark (speed)
+
 
 # Load config file
 configfile='./config.cfg'
@@ -74,6 +76,9 @@ for NODE in "${NODES[@]}"
 	   EPS=$(cat $NODE-getbenchmarks.json | jq ."data.eps")
 	   TOALSTORAGE=$(cat $NODE-getbenchmarks.json | jq ."data.totalstorage")
 	   DDWRITE=$(cat $NODE-getbenchmarks.json | jq ."data.ddwrite")
+	   PING=$(cat $NODE-getbenchmarks.json | jq ."data.ping" | awk -F "." '{ print $1 }')
+	   UPLOAD=$(cat $NODE-getbenchmarks.json | jq ."data.upload_speed" | awk -F "." '{ print $1 }')
+	   DOWNLOAD=$(cat $NODE-getbenchmarks.json | jq ."data.download_speed" | awk -F "." '{ print $1 }')
 	   if [[ $STATUS == "success" && $DATASTATUS == "CONFIRMED" ]] ;then
 	       NODESUP=$(($NODESUP + 1 ))
 	       LASTP=$(cat $NODE.json  | jq ."data.lastpaid" | tr -d '"')
@@ -101,14 +106,15 @@ for NODE in "${NODES[@]}"
                else
 		   NODEBLOCK="${RED}$GETBLOCK${NC} ${X_MARK} Explorer: $EXPLORERHEIGHT"
                fi
-               NEXTPAY=$(echo $LASTPH+$STRATUS-$EXPLORERHEIGHT | bc)
-               PAYHOUR=$(echo $NEXTPAY*2/60 | bc)
+	       NEXTPAY=$(echo $LASTPH+$STRATUS-$EXPLORERHEIGHT | bc)
+	       PAYHOUR=$(echo $NEXTPAY*2/60 | bc)
                echo -e "FluxNodes IP: ${BLUE}$NODE${NC}\t Tier: ${BLUE}$TIER${NC}\t Status: ${GREEN}$DATASTATUS${NC} ${CHECK_MARK}"
 	       echo -e "Version Flux: $FLUXVER\t\t FluxOS: $FLUXOSVER\t Benchmark: $BENCHMARKVER"
-	       echo -e "Last paid: ${YELLOW}$PDATE${NC}\t Block: ${YELLOW}$LASTPH${NC}\t Current Block: $NODEBLOCK"
-	       echo -e "Next payment: ${YELLOW}$PAYHOUR${NC} hours"
 	       echo -e "CPU Cores: ${CYAN}$CORES${NC}\t\t Mem: ${YELLOW}$RAM${NC}\t Total Storage:${BLUE}$TOALSTORAGE${NC}"
-	       echo -e "EPS: ${CYAN}$EPS${NC}\t\t Disk WriteSpeed:${BLUE}$DDWRITE${NC}"
+	       echo -e "EPS: ${CYAN}$EPS${NC}\t\t Disk WriteSpeed: ${BLUE}$DDWRITE${NC}"
+	       echo -e "Ping:${CYAN}$PING${NC} ms\t\t Speed Download: ${BLUE}$DOWNLOAD${NC}\t Upload: ${BLUE}$UPLOAD${NC} Mbit/s"
+	       echo -e "Last paid: ${YELLOW}$PDATE${NC}\t Block: ${YELLOW}$LASTPH${NC}\t Current Block: $NODEBLOCK"
+               echo -e "Next payment: ${YELLOW}$PAYHOUR${NC} hours"
                echo -e ""
                echo -e "Apps:"
                echo -e "------"
@@ -140,8 +146,8 @@ for NODE in "${NODES[@]}"
                                APPVERSION="${RED}$APPVER${NC} ${X_MARK}"
                            fi
 			   # Fetch nodes block height
-		           KDANODE=$(echo -e "$NODE" | awk -F ":" '{ print $1 }')
-                           KDANODEHEIGHT=$(curl -k -s https://"$KDANODE":30004/chainweb/0.0/mainnet01/cut | jq ".height")
+			   KDANODE=$(echo -e "$NODE" | awk -F ":" '{ print $1 }')
+			   KDANODEHEIGHT=$(curl -k -s https://"$KDANODE":30004/chainweb/0.0/mainnet01/cut | jq ".height")
 		       else
 		           if [[ "$APPVER" == *"latest"* ]]; then
 		               APPVERSION="${GREEN}$APPVER${NC} ${CHECK_MARK}"
@@ -168,12 +174,13 @@ for NODE in "${NODES[@]}"
 		       echo -e "Version: $APPVERSION\tState: $STATES\tApp status: $APPSTATS\t"
 		   fi
 	           done
-	   fi
+               fi
            else
                echo -e "============================================================================"
-	       echo -e "FluxNode IP: ${YELLOW}$NODE${NC}\tTier: ${BLUE}$TIER${NC}\tStatus: ${YELLOW}$DATASTATUS ${X_MARK}"
+               echo -e "FluxNode IP: ${YELLOW}$NODE${NC}\tTier: ${BLUE}$TIER${NC}\tStatus: ${YELLOW}$DATASTATUS ${X_MARK}"
                echo -e "Status: ${RED}Not confirmed${NC}"
-	   fi
+   
+	   fi 
    fi
    # Clean up
    rm -f node-count.json
